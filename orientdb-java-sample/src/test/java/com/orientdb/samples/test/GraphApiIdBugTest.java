@@ -26,8 +26,9 @@ public class GraphApiIdBugTest {
     private OrientGraphFactory factory = null;
 
     static {
-
+        /*
         try {
+     
             OServer server = OServerMain.create();
             server.startup("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + "<orient-server>"
                     + "<network>" + "<protocols>"
@@ -76,10 +77,12 @@ public class GraphApiIdBugTest {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-
+  
+   */
 
     }
+    
+    
 
     @BeforeClass
     public void setup() {
@@ -97,6 +100,26 @@ public class GraphApiIdBugTest {
         }
         graph.commit();
         graph.shutdown();
+    }
+
+
+    @Test
+    public void testForConnectionPooling() {
+
+        OrientGraph graph = null;
+
+        for (int n = 0; n < 100; n++) {
+            graph = factory.getTx();
+            graph.setAutoStartTx(false);
+            graph.begin();
+
+            for (int i = 0; i < 5; i++) {
+                graph.addVertex(CLASS_PREFIX + USER, createProperties());
+            }
+            graph.commit();
+            graph.shutdown();
+        }
+
     }
 
     @Test
@@ -141,6 +164,8 @@ public class GraphApiIdBugTest {
         graph.shutdown();
 
     }
+
+
 
     private Map<String, Object> createProperties() {
         Map<String, Object> props = new HashMap<String, Object>();
