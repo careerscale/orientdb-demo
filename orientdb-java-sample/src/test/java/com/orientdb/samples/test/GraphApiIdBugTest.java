@@ -20,16 +20,25 @@ public class GraphApiIdBugTest {
     @Test
     public void testIdBug() {
         OrientGraph graph = new OrientGraphFactory("remote:localhost/demo", "root", "cloud").setupPool(1, 10).getTx();
-        // graph.addVertex(id, prop)
+        graph.setAutoStartTx(false);
+        graph.begin();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             graph.addVertex(CLASS_PREFIX + USER, createProperties());
-
         }
-        /*
-         * graph.addVertex(CLASS_PREFIX + USER, createProperties()); graph.addVertex(CLASS_PREFIX +
-         * USER, createProperties()); graph.addVertex(CLASS_PREFIX + USER, createProperties());
-         */
+        graph.commit();
+    }
+
+    @Test
+    public void testIdBug_working() {
+        OrientGraph graph = new OrientGraphFactory("remote:localhost/demo", "root", "cloud").setupPool(1, 10).getTx();
+        graph.setAutoStartTx(false);
+        graph.begin();
+        graph.addVertex(CLASS_PREFIX + USER, createProperties());
+        graph.addVertex(CLASS_PREFIX + USER, createProperties());
+        graph.addVertex(CLASS_PREFIX + USER, createProperties());
+        graph.addVertex(CLASS_PREFIX + USER, createProperties());
+        graph.addVertex(CLASS_PREFIX + USER, createProperties());
         graph.commit();
 
     }
