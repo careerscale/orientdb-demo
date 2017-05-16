@@ -1,16 +1,16 @@
 package com.orientdb.samples.test;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.collections.Lists;
 
-import com.orientechnologies.orient.server.OServer;
-import com.orientechnologies.orient.server.OServerMain;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 
@@ -26,63 +26,10 @@ public class GraphApiIdBugTest {
     private OrientGraphFactory factory = null;
 
     static {
-        /*
-        try {
-     
-            OServer server = OServerMain.create();
-            server.startup("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" + "<orient-server>"
-                    + "<network>" + "<protocols>"
-                    + "<protocol name=\"binary\" implementation=\"com.orientechnologies.orient.server.network.protocol.binary.ONetworkProtocolBinary\"/>"
-                    + "<protocol name=\"http\" implementation=\"com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb\"/>"
-                    + "</protocols>" + "<listeners>"
-                    + "<listener ip-address=\"0.0.0.0\" port-range=\"2424-2430\" protocol=\"binary\"/>"
-                    + "<listener ip-address=\"0.0.0.0\" port-range=\"2480-2490\" protocol=\"http\"/>" + "</listeners>"
-                    + "</network>" + "<users>" + "<user name=\"root\" password=\"ThisIsA_TEST\" resources=\"*\"/>"
-                    + "</users>" + "<properties>"
-                    + "<entry name=\"orientdb.www.path\" value=\"C:/git_repo/orientdb/distribution/target/orientdb-community-3.0.0-SNAPSHOT.dir/orientdb-community-3.0.0-SNAPSHOT/www/\"/>"
-                    + "<entry name=\"orientdb.config.file\" value=\"C:/git_repo/orientdb/distribution/target/orientdb-community-3.0.0-SNAPSHOT.dir/orientdb-community-3.0.0-SNAPSHOT/config/orientdb-server-config.xml\"/>"
-                    + "<entry name=\"server.cache.staticResources\" value=\"false\"/>"
-                    + "<entry name=\"log.console.level\" value=\"info\"/>"
-                    + "<entry name=\"log.file.level\" value=\"fine\"/>"
-                    // The following is required to eliminate an error or warning "Error on
-                    // resolving
-                    // property: ORIENTDB_HOME"
-                    + "<entry name=\"plugin.dynamic\" value=\"false\"/>" + "</properties>" + "</orient-server>");
-            // server.activate();
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-  
-   */
 
     }
-    
-    
+
+
 
     @BeforeClass
     public void setup() {
@@ -100,6 +47,7 @@ public class GraphApiIdBugTest {
         }
         graph.commit();
         graph.shutdown();
+        verifyUniqueIds();
     }
 
 
@@ -120,6 +68,22 @@ public class GraphApiIdBugTest {
             graph.shutdown();
         }
 
+        verifyUniqueIds();
+
+
+    }
+
+    private void verifyUniqueIds() {
+
+        OrientGraph graph = factory.getTx();
+        Iterable<Vertex> vertices = graph.getVerticesOfClass("User");
+        List<Long> ids = Lists.newArrayList();
+        for (Vertex vertex : vertices) {
+            Long id = vertex.getProperty("id");
+            Assert.assertFalse(ids.contains(id), "id is duplicate : " + id);
+            ids.add(id);
+        }
+        graph.shutdown();
     }
 
     @Test
@@ -148,6 +112,7 @@ public class GraphApiIdBugTest {
 
         graph.commit();
         graph.shutdown();
+        verifyUniqueIds();
     }
 
     @Test
@@ -162,6 +127,8 @@ public class GraphApiIdBugTest {
 
         graph.commit();
         graph.shutdown();
+
+        verifyUniqueIds();
 
     }
 
@@ -181,24 +148,5 @@ public class GraphApiIdBugTest {
 
         return props;
     }
-
-
-
-    // @Test
-    /**
-     * public void testIdbug_embedded() throws Exception { OrientGraph graph = new
-     * OrientGraphFactory("plocal:c:/data/orientdb/databases/demo3", "root", "cloud") .setupPool(1,
-     * 10).getTx(); graph.setAutoStartTx(false); graph.begin(); graph.addVertex(CLASS_PREFIX + USER,
-     * createProperties()); graph.addVertex(CLASS_PREFIX + USER, createProperties());
-     * graph.addVertex(CLASS_PREFIX + USER, createProperties()); graph.addVertex(CLASS_PREFIX +
-     * USER, createProperties()); graph.addVertex(CLASS_PREFIX + USER, createProperties());
-     * graph.commit();
-     * 
-     * 
-     * 
-     * }
-     * 
-     **/
-
 
 }
