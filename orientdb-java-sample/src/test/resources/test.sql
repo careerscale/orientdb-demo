@@ -2,6 +2,10 @@ SET ignoreErrors true;
 DROP DATABASE remote:/localhost/demo root cloud
 SET ignoreErrors false;
 
+## CREATE DATABASE plocal:c:/data/orientdb/databases/demo
+## connect plocal:c:/data/orientdb/databases/demo root cloud
+
+
 CREATE DATABASE remote:/localhost/demo root cloud plocal graph
 connect remote:localhost/demo root cloud 
 ALTER DATABASE DATETIMEFORMAT "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" 
