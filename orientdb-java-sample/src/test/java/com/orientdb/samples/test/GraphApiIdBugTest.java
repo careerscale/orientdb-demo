@@ -22,12 +22,14 @@ public class GraphApiIdBugTest {
         OrientGraph graph = new OrientGraphFactory("remote:localhost/demo", "root", "cloud").setupPool(1, 10).getTx();
         // graph.addVertex(id, prop)
 
+        for (int i = 0; i < 10; i++) {
+            graph.addVertex(CLASS_PREFIX + USER, createProperties());
 
-        graph.addVertex(CLASS_PREFIX + USER, createProperties());
-        graph.addVertex(CLASS_PREFIX + USER, createProperties());
-        graph.addVertex(CLASS_PREFIX + USER, createProperties());
-        graph.addVertex(CLASS_PREFIX + USER, createProperties());
-
+        }
+        /*
+         * graph.addVertex(CLASS_PREFIX + USER, createProperties()); graph.addVertex(CLASS_PREFIX +
+         * USER, createProperties()); graph.addVertex(CLASS_PREFIX + USER, createProperties());
+         */
         graph.commit();
 
     }
