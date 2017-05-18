@@ -39,44 +39,6 @@ public class OrientDbTest {
         graph.executeSql("Delete vertex Bonus");
     }
 
-    @Test(priority = 1)
-    public void testWithTransactionNormal() {
-
-        OrientGraph graph = factory.getTx();
-        try {
-            OVertex userVertex = graph.getRawDatabase().newVertex("User");
-            userVertex.setProperty("name", "John");
-            userVertex.setProperty("status", 1l);
-            userVertex.setProperty("id", 1l);
-            userVertex.save();
-
-            OVertex bonusVertex = graph.getRawDatabase().newVertex("Bonus");
-            bonusVertex.setProperty("name", "Allowance");
-            bonusVertex.setProperty("volume", 1000l);
-            bonusVertex.setProperty("id", 100);
-            bonusVertex.save();
-
-            OVertex bonus1Vertex = graph.getRawDatabase().newVertex("Bonus");
-            bonus1Vertex.setProperty("name", "Petrol Allowance");
-            bonus1Vertex.setProperty("volume", 200l);
-            bonus1Vertex.setProperty("id", 102);
-            bonus1Vertex.save();
-
-            userVertex.addEdge(bonusVertex, "HAS").save();
-            userVertex.addEdge(bonus1Vertex, "HAS").save();
-
-            graph.commit();
-
-            verifyCount(1);
-        } catch (Exception e) {
-            graph.rollback();
-            e.printStackTrace();
-
-        } finally {
-            graph.close();
-        }
-    }
-
     @Test(priority = 2)
     public void testWithTransactionRollback() throws Exception {
 
@@ -105,7 +67,7 @@ public class OrientDbTest {
             graph.commit();
             System.out.println("should not be printed");
         } catch (Exception e) {
-            graph.rollback();
+            // graph.rollback();
             e.printStackTrace();
             // throw new Exception("createUserTransaction ", e);
         } finally {
