@@ -123,7 +123,7 @@ public class OrientDbTransactionTest {
             Long id = v.getProperty("id");
             ids.add(id);
         });
-        Assert.assertEquals(ids.size(), 1);
+        Assert.assertEquals(ids.size(), count);
         graph.close();
     }
 
