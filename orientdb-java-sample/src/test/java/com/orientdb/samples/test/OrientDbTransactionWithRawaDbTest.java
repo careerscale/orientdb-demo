@@ -1,6 +1,8 @@
 package com.orientdb.samples.test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
@@ -12,7 +14,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
-import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 @Test
@@ -21,7 +22,7 @@ public class OrientDbTransactionWithRawaDbTest {
 
     @BeforeClass
     public void setUp() {
-        factory = new OrientGraphFactory("remote:localhost/test", "root", "cloud").setupPool(1, 10);
+        factory = new OrientGraphFactory("remote:localhost/test", "root", "cloud");
     }
 
 
@@ -36,27 +37,22 @@ public class OrientDbTransactionWithRawaDbTest {
     private void performTransactionWithRawDB() throws Exception {
 
         OrientGraph graph = factory.getTx();
+
         try {
-            OVertex userVertex = graph.getRawDatabase().newVertex("User");
+            Vertex userVertex = graph.addVertex("User");
 
-            userVertex.setProperty("name", "Tony");
-            userVertex.setProperty("status", 1l);
-            userVertex.setProperty("id", 5l);
-            userVertex.save();
+            userVertex.property("name", "Tony");
+            userVertex.property("status", 1l);
+            userVertex.property("id", 5l);
 
-            OVertex bonusVertex = graph.getRawDatabase().newVertex("Bonus");
-            bonusVertex.setProperty("name", "Allowance");
-            bonusVertex.setProperty("volume", 10l);
-            bonusVertex.setProperty("id", 104);
-            bonusVertex.save();
 
-            OVertex bonus1Vertex = graph.getRawDatabase().newVertex("Bonus");
-            bonus1Vertex.setProperty("name", "Petrol Allowance");
-            bonus1Vertex.setProperty("id", 105);
-            bonus1Vertex.save();
+            Vertex bonusVertex = graph.addVertex("Bonus");
+            bonusVertex.property("name", "Allowance");
+            bonusVertex.property("volume", 10l);
+            bonusVertex.property("id", 104);
 
-            userVertex.addEdge(bonusVertex, "HAS").save();
-            userVertex.addEdge(bonus1Vertex, "HAS").save();
+            // userVertex.addEdge(bonusVertex, "HAS").save();
+            // userVertex.addEdge(bonus1Vertex, "HAS").save();
 
             graph.commit();
         } catch (Exception e) {
@@ -96,30 +92,36 @@ public class OrientDbTransactionWithRawaDbTest {
         }
     }
 
+    private Map<String, Object> buildUserProperties(String name, Long status) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("name", name);
+        params.put("status", status);
+        return params;
+    }
+
+    private Map<String, Object> buildBonusProperties(String name, Long volume) {
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("name", name);
+        params.put("volume", volume);
+
+        return params;
+    }
 
     private void performTransaction() throws Exception {
 
         OrientGraph graph = factory.getTx();
         try {
-            Vertex userVertex = graph.addVertex("User");
 
-            userVertex.property("name", "Tony");
-            userVertex.property("status", 1l);
-            userVertex.property("id", 5l);
+            Vertex userVertex = graph.addVertex("User", buildUserProperties("Tony", 1l));
 
-            Vertex bonusVertex = graph.addVertex("Bonus");
-            bonusVertex.property("name", "Allowance");
-            bonusVertex.property("volume", 10l);
-            bonusVertex.property("id", 104);
+            Vertex bonusVertex = graph.addVertex("Bonus", buildBonusProperties("TestBonus", 100l));
 
-            Vertex bonus1Vertex = graph.addVertex("Bonus");
-            bonus1Vertex.property("name", "Petrol Allowance");
-            bonusVertex.property("volume", 10l);
-            bonus1Vertex.property("id", 105);
+            Vertex bonus2Vertex = graph.addVertex("Bonus", buildBonusProperties("TestBonus", 100l));
             userVertex.addEdge("HAS", bonusVertex);
-            userVertex.addEdge("HAS", bonus1Vertex);
+            userVertex.addEdge("HAS", bonus2Vertex);
 
             graph.commit();
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("createUserTransaction ", e);
@@ -131,26 +133,13 @@ public class OrientDbTransactionWithRawaDbTest {
 
     @Test()
     public void createUserTransactionTest() throws Exception {
-        verifyCount(0);
+        // verifyCount(0);
         try {
             performTransaction();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        verifyCount(0);
-        // Let us assert for no data
-    }
-
-
-    @Test()
-    public void createUserTransactionWithRollBack() throws Exception {
-        verifyCount(0);
-        try {
-            performTransactionWithRollBack();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        verifyCount(0);
+        // verifyCount(1);
         // Let us assert for no data
     }
 
@@ -167,7 +156,7 @@ public class OrientDbTransactionWithRawaDbTest {
             ids.add(id);
         });
 
-        Assert.assertTrue(ids.size() >= count, "row count should be  " + count);
+        Assert.assertEquals(ids.size(), 1);
 
         graph.close();
     }
