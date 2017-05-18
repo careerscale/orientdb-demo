@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -65,6 +66,7 @@ public class OrientDbTransactionTest {
 
     private Map<String, Object> buildUserProperties(String name, Long status) {
         Map<String, Object> params = new HashMap<String, Object>();
+        params.put("class", "User");
         params.put("name", name);
         params.put("status", status);
         return params;
@@ -72,6 +74,7 @@ public class OrientDbTransactionTest {
 
     private Map<String, Object> buildBonusProperties(String name, Long volume) {
         Map<String, Object> params = new HashMap<String, Object>();
+        params.put("class", "Bonus");
         params.put("name", name);
         params.put("volume", volume);
 
@@ -82,14 +85,16 @@ public class OrientDbTransactionTest {
 
         OrientGraph graph = factory.getNoTx();
         try {
+            Vertex userVertex = graph.addVertex(T.label, "User", "name", "Tony", "status", 1l);
 
-            Vertex userVertex = graph.addVertex("User", buildUserProperties("Tony", 1l));
+            Vertex user2Vertex = graph.addVertex(T.label, "User", "name", "John", "status", 1l);
 
-            Vertex bonusVertex = graph.addVertex("Bonus", buildBonusProperties("TestBonus", 100l));
+            Vertex bonusVertex = graph.addVertex(T.label, "Bonus", "name", "Test bonus", "volume", 100l);
+            Vertex bonus2Vertex = graph.addVertex(T.label, "Bonus", "name", "Test bonustest ", "volume", 102l);
 
-            Vertex bonus2Vertex = graph.addVertex("Bonus", buildBonusProperties("TestBonus", 100l));
             userVertex.addEdge("HAS", bonusVertex);
             userVertex.addEdge("HAS", bonus2Vertex);
+
 
             graph.commit();
 
@@ -110,7 +115,7 @@ public class OrientDbTransactionTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        verifyCount(1);
+        verifyCount(2);
         // Let us assert for no data
     }
 
