@@ -38,22 +38,14 @@ public class OrientDbTransactionTest {
 
         OrientGraph graph = factory.getTx();
         try {
-            Vertex userVertex = graph.addVertex("User");
-            userVertex.property("name", "Tony");
-            userVertex.property("status", 1l);
-            userVertex.property("id", 5l);
+            Vertex userVertex = graph.addVertex(T.label, "User", "name", "Tony", "status", 1l);
+            Vertex user2Vertex = graph.addVertex(T.label, "User", "name", "John", "status", 2l);
+            Vertex bonusVertex = graph.addVertex(T.label, "Bonus", "name", "Test bonus", "volume", 100l);
+            Vertex bonus2Vertex = graph.addVertex(T.label, "Bonus", "name", "Test bonustest ");
 
-
-            Vertex bonusVertex = graph.addVertex("Bonus");
-            bonusVertex.property("name", "Allowance");
-            bonusVertex.property("volume", 10l);
-            bonusVertex.property("id", 104);
-
-            Vertex bonus1Vertex = graph.addVertex("Bonus");
-            bonus1Vertex.property("name", "Petrol Allowance");
-            bonus1Vertex.property("id", 105);
             userVertex.addEdge("HAS", bonusVertex);
-            userVertex.addEdge("HAS", bonus1Vertex);
+            userVertex.addEdge("HAS", bonus2Vertex);
+
 
             graph.commit();
         } catch (Exception e) {
@@ -107,6 +99,13 @@ public class OrientDbTransactionTest {
     }
 
 
+    /**
+     * https://github.com/orientechnologies/orientdb/issues/7430 Multiple vertices of same time
+     * should be saved in a single transaction, but only one User and one Bonus object are getting
+     * saved. leaves partial data back in db.
+     * 
+     * @throws Exception
+     */
     @Test()
     public void createUserTransactionTest() throws Exception {
         verifyCount(0);
@@ -116,6 +115,25 @@ public class OrientDbTransactionTest {
             e.printStackTrace();
         }
         verifyCount(2);
+        // Let us assert for no data
+    }
+
+
+    /**
+     * https://github.com/orientechnologies/orientdb/issues/7429 No data should be saved, but it
+     * leaves partial data back in db.
+     * 
+     * @throws Exception
+     */
+    @Test()
+    public void createUserTransactionWithRollbackTest() throws Exception {
+        verifyCount(0);
+        try {
+            performTransactionWithRollBack();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        verifyCount(0);
         // Let us assert for no data
     }
 
