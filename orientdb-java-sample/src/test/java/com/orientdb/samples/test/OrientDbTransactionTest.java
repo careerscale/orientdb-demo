@@ -17,7 +17,7 @@ import org.testng.collections.Lists;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 @Test
-public class OrientDbTransactionWithRawaDbTest {
+public class OrientDbTransactionTest {
     OrientGraphFactory factory;
 
     @BeforeClass
@@ -33,36 +33,6 @@ public class OrientDbTransactionWithRawaDbTest {
         graph.executeSql("Delete vertex Bonus");
     }
 
-
-    private void performTransactionWithRawDB() throws Exception {
-
-        OrientGraph graph = factory.getTx();
-
-        try {
-            Vertex userVertex = graph.addVertex("User");
-
-            userVertex.property("name", "Tony");
-            userVertex.property("status", 1l);
-            userVertex.property("id", 5l);
-
-
-            Vertex bonusVertex = graph.addVertex("Bonus");
-            bonusVertex.property("name", "Allowance");
-            bonusVertex.property("volume", 10l);
-            bonusVertex.property("id", 104);
-
-            // userVertex.addEdge(bonusVertex, "HAS").save();
-            // userVertex.addEdge(bonus1Vertex, "HAS").save();
-
-            graph.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception("createUserTransaction ", e);
-        } finally {
-            graph.close();
-        }
-    }
-
     private void performTransactionWithRollBack() throws Exception {
 
         OrientGraph graph = factory.getTx();
@@ -71,6 +41,7 @@ public class OrientDbTransactionWithRawaDbTest {
             userVertex.property("name", "Tony");
             userVertex.property("status", 1l);
             userVertex.property("id", 5l);
+
 
             Vertex bonusVertex = graph.addVertex("Bonus");
             bonusVertex.property("name", "Allowance");
@@ -109,7 +80,7 @@ public class OrientDbTransactionWithRawaDbTest {
 
     private void performTransaction() throws Exception {
 
-        OrientGraph graph = factory.getTx();
+        OrientGraph graph = factory.getNoTx();
         try {
 
             Vertex userVertex = graph.addVertex("User", buildUserProperties("Tony", 1l));
@@ -133,34 +104,28 @@ public class OrientDbTransactionWithRawaDbTest {
 
     @Test()
     public void createUserTransactionTest() throws Exception {
-        // verifyCount(0);
+        verifyCount(0);
         try {
             performTransaction();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // verifyCount(1);
+        verifyCount(1);
         // Let us assert for no data
     }
-
-
 
     private void verifyCount(int count) {
         OrientGraph graph = factory.getTx();
         OResultSet vertices = graph.executeSql("select from User");
-
         List<Long> ids = Lists.newArrayList();
 
         vertices.vertexStream().forEach(v -> {
             Long id = v.getProperty("id");
             ids.add(id);
         });
-
         Assert.assertEquals(ids.size(), 1);
-
         graph.close();
     }
-
 
     @AfterClass
     public void destroy() {
