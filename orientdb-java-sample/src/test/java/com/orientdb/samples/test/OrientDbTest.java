@@ -12,9 +12,15 @@ import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
 import com.orientechnologies.orient.core.record.OVertex;
-import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
+/**
+ * This test shows problem with transaction mgmt in OrientDB. Execute
+ * src\test\resources\testSchema.sql first as schema definition
+ * 
+ * @author hmallepa
+ *
+ */
 @Test
 public class OrientDbTest {
     OrientGraphFactory factory;
@@ -97,6 +103,7 @@ public class OrientDbTest {
             userVertex.addEdge(bonus1Vertex, "HAS").save();
 
             graph.commit();
+            System.out.println("should not be printed");
         } catch (Exception e) {
             graph.rollback();
             e.printStackTrace();
@@ -104,7 +111,7 @@ public class OrientDbTest {
         } finally {
             graph.close();
         }
-
+        System.out.println("should be printed");
         verifyCount(0);
 
 
@@ -120,29 +127,8 @@ public class OrientDbTest {
             Long id = v.getProperty("id");
             ids.add(id);
         });
-        Assert.assertEquals(ids.size(), 1);
+        Assert.assertEquals(ids.size(), count);
         graph.close();
-    }
-
-
-    @Test(priority = 3)
-    public void getUsers() throws Exception {
-
-        OrientGraph graph = factory.getTx();
-        try {
-            Iterable<ODocument> userVertexes = graph.getRawDatabase().browseClass("User");
-
-            for (ODocument oDocument : userVertexes) {
-                OVertex userVertex = oDocument.asVertex().get();
-                System.out.println("UserName------" + userVertex.getProperty("name"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new Exception("getUsers ", e);
-        } finally {
-            graph.close();
-        }
-
     }
 
     @AfterClass
