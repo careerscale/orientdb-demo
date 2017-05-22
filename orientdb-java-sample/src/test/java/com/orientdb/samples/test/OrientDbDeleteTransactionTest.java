@@ -13,6 +13,12 @@ import org.testng.collections.Lists;
 import com.orientechnologies.orient.core.record.OVertex;
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
+/**
+ * Execute supporting db script. orientdb-java-sample\src\test\resources\testSchema.sql
+ * 
+ * 
+ *
+ */
 @Test
 public class OrientDbDeleteTransactionTest {
 
@@ -142,11 +148,13 @@ public class OrientDbDeleteTransactionTest {
 
     @Test(priority = 4)
     public void deleteUsers() throws Exception {
-
         OrientGraph graph = factory.getTx();
+        // Verify that there exists 2 records in the db.
+        verifyCount(2);
         try {
             // Without Transaction Delete API is working fine
             graph.begin();
+
             OResultSet resultSet = graph.executeSql("delete Vertex from User where name= ?", "John");
             resultSet.close();
             graph.commit();
