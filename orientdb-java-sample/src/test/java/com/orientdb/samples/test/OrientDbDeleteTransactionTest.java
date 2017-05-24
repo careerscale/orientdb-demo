@@ -26,7 +26,7 @@ public class OrientDbDeleteTransactionTest {
 
     @BeforeClass
     public void setUp() {
-        factory = new OrientGraphFactory("remote:localhost/test", "root", "cloud");
+        factory = new OrientGraphFactory("remote:localhost/demo", "root", "cloud");
         OrientGraph graph = factory.getTx();
         graph.executeSql("Delete vertex User");
         graph.executeSql("Delete vertex Bonus");
@@ -41,20 +41,20 @@ public class OrientDbDeleteTransactionTest {
         try {
             graph.begin();
             OVertex userVertex = graph.getRawDatabase().newVertex("User");
-            userVertex.setProperty("name", "John");
+            userVertex.setProperty("name", "Jeff");
             userVertex.setProperty("status", 1l);
             // userVertex.setProperty("id", 1l);
             userVertex.save();
 
             OVertex bonusVertex = graph.getRawDatabase().newVertex("Bonus");
             bonusVertex.setProperty("name", "Allowance");
-            bonusVertex.setProperty("volume", 1000l);
+            bonusVertex.setProperty("amount", 1000);
             // bonusVertex.setProperty("id", 100);
             bonusVertex.save();
 
             OVertex bonus1Vertex = graph.getRawDatabase().newVertex("Bonus");
             bonus1Vertex.setProperty("name", "Petrol Allowance");
-            bonus1Vertex.setProperty("volume", 200l);
+            bonus1Vertex.setProperty("amount", 200);
             // bonus1Vertex.setProperty("id", 102);
             bonus1Vertex.save();
 
@@ -87,7 +87,7 @@ public class OrientDbDeleteTransactionTest {
 
             OVertex bonusVertex = graph.getRawDatabase().newVertex("Bonus");
             bonusVertex.setProperty("name", "Allowance");
-            bonusVertex.setProperty("volume", 10l);
+            bonusVertex.setProperty("amount", 10l);
             bonusVertex.setProperty("id", 104);
             bonusVertex.save();
 
@@ -102,7 +102,7 @@ public class OrientDbDeleteTransactionTest {
             graph.commit();
         } catch (Exception e) {
             graph.rollback();
-            Assert.assertEquals("exception", e);
+            Assert.assertNotNull(e);
         } finally {
             graph.close();
         }
@@ -122,13 +122,13 @@ public class OrientDbDeleteTransactionTest {
 
             OVertex bonusVertex = graph.getRawDatabase().newVertex("Bonus");
             bonusVertex.setProperty("name", "Medical Allowance");
-            bonusVertex.setProperty("volume", 1000l);
+            bonusVertex.setProperty("amount", 1000);
             // bonusVertex.setProperty("id", 100);
             bonusVertex.save();
 
             OVertex bonus1Vertex = graph.getRawDatabase().newVertex("Bonus");
             bonus1Vertex.setProperty("name", "Car Allowance");
-            bonus1Vertex.setProperty("volume", 200l);
+            bonus1Vertex.setProperty("amount", 200);
             // bonus1Vertex.setProperty("id", 102);
             bonus1Vertex.save();
 
@@ -155,7 +155,7 @@ public class OrientDbDeleteTransactionTest {
             // Without Transaction Delete API is working fine
             graph.begin();
 
-            OResultSet resultSet = graph.executeSql("delete Vertex from User where name= ?", "John");
+            OResultSet resultSet = graph.executeSql("delete Vertex from User where name= ?", "Jeff");
             resultSet.close();
             graph.commit();
         } catch (Exception e) {

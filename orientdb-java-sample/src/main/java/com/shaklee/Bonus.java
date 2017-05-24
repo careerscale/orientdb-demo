@@ -1,12 +1,12 @@
 package com.shaklee;
 
-import java.util.Map;
+import com.orientechnologies.orient.core.record.OVertex;
+
 
 public class Bonus {
 
     private Long id;
-    private String bonusType;
-    private Map<String, Double> volumes;
+    private Double amount;
 
     public Long getId() {
         return id;
@@ -16,22 +16,23 @@ public class Bonus {
         this.id = id;
     }
 
-    public String getBonusType() {
-        return bonusType;
+    public Double getAmount() {
+        return amount;
     }
 
-    public void setBonusType(String bonusType) {
-        this.bonusType = bonusType;
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 
-    public Map<String, Double> getVolumes() {
-        return volumes;
+    public static String BONUS_AMOUNT = "amount";
+
+    public static Bonus toBonus(OVertex bonusVertex) {
+        Bonus bonus = null;
+        if (bonusVertex != null) {
+            bonus = new Bonus();
+            bonus.setAmount(bonusVertex.getProperty(BONUS_AMOUNT));
+        }
+        return bonus;
     }
-
-    public void setVolumes(Map<String, Double> volumes) {
-        this.volumes = volumes;
-    }
-
-
 
 }
