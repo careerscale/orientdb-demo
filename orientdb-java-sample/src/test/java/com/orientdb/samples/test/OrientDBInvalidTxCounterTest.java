@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -15,6 +17,12 @@ import com.shaklee.Address;
 import com.shaklee.Bonus;
 import com.shaklee.User;
 
+/**
+ * Execute the test schema in src/test/resources/test.sql
+ * 
+ * @author
+ *
+ */
 public class OrientDBInvalidTxCounterTest {
 
     OrientGraphFactory factory;
@@ -32,7 +40,7 @@ public class OrientDBInvalidTxCounterTest {
 
 
     @Test
-    public void createUser() {
+    public void createUser_Overtex() {
 
         OrientGraph graph = factory.getTx();
         try {
@@ -67,6 +75,15 @@ public class OrientDBInvalidTxCounterTest {
             userVertex.addEdge(addressVertex, "LIVES_IN").save();
             userVertex.addEdge(address1Vertex, "LIVES_IN").save();
 
+            OVertex userVertex2 = graph.getRawDatabase().newVertex("User");
+            userVertex2.setProperty("name", "Luca");
+            userVertex2.setProperty("status", 1l);
+            // userVertex.setProperty("id", 1l);
+            userVertex2.save();
+
+            userVertex2.addEdge(addressVertex, "LIVES_IN").save();
+            userVertex2.addEdge(address1Vertex, "LIVES_IN").save();
+
             User user = load(userVertex);
             System.out.println(user);
 
@@ -100,6 +117,43 @@ public class OrientDBInvalidTxCounterTest {
             user.setAddresses(address);
         }
         return user;
+    }
+
+
+    @Test
+    public void createUser_gremlin() {
+
+        OrientGraph graph = factory.getTx();
+        try {
+            graph.begin();
+            Vertex userVertex = graph.addVertex(T.label, "User", "name", "jefff", "status", 1l);
+
+            Vertex bonusVertex = graph.addVertex(T.label, "Bonus", "amount", 1000);
+            Vertex bonusVertex2 = graph.addVertex(T.label, "Bonus", "amount", 200);
+
+            userVertex.addEdge("HAS", bonusVertex);
+            userVertex.addEdge("HAS", bonusVertex2);
+
+
+            Vertex addressVertex = graph.addVertex(T.label, "Address", "street", "Homestead Rd");
+
+            Vertex addressVertex2 = graph.addVertex(T.label, "Address", "street", "Saratoga Ave");
+
+            userVertex.addEdge("LIVES_IN", addressVertex);
+            userVertex.addEdge("LIVES_IN", addressVertex2);
+
+            Vertex userVertex2 = graph.addVertex(T.label, "User", "name", "Luca", "status", 1l);
+
+            userVertex2.addEdge("LIVES_IN", addressVertex);
+            userVertex2.addEdge("LIVES_IN", addressVertex2);
+
+
+            graph.commit();
+        } finally {
+            if (!graph.isClosed()) {
+                graph.close();
+            }
+        }
     }
 
 
@@ -145,10 +199,6 @@ public class OrientDBInvalidTxCounterTest {
                 System.out.println(user);
             }
             graph.commit();
-        } catch (Exception e) {
-            graph.rollback();
-            e.printStackTrace();
-
         } finally {
             if (!graph.isClosed()) {
                 graph.close();
