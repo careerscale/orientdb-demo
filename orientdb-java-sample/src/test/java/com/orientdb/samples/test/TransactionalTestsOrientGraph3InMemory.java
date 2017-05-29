@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.structure.T;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -91,7 +92,8 @@ public class TransactionalTestsOrientGraph3InMemory {
     public void testBugForUnknownProperty() {
 
         OrientGraph graph = factory.getTx();;
-        graph.addVertex(CLASS_PREFIX + USER, createProperties());
+
+        graph.addVertex(T.label, USER, NAME, "first +  last" + new Random().nextDouble());
 
         graph.commit();
         graph.close();
