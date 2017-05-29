@@ -8,6 +8,7 @@ import java.util.Random;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
 import org.apache.tinkerpop.gremlin.structure.T;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -93,7 +94,8 @@ public class TransactionalTestsOrientGraph3InMemory {
 
         OrientGraph graph = factory.getTx();;
 
-        graph.addVertex(T.label, USER, NAME, "first +  last" + new Random().nextDouble());
+        Vertex vertex = graph.addVertex(T.label, USER, NAME, "first +  last" + new Random().nextDouble());
+        vertex.property("address", "test address");
 
         graph.commit();
         graph.close();
@@ -107,8 +109,16 @@ public class TransactionalTestsOrientGraph3InMemory {
             String someProperty = v.getProperty("name");
 
             OrientGraph graph1 = factory.getTx();
-            graph1.vertices(v.getRecord().getIdentity()).next().value("test");
+            String value = graph1.vertices(v.getRecord().getIdentity()).next().value("name");
+            System.out.println("value is " + value);
+
+            try {
+                String addressValue = graph1.vertices(v.getRecord().getIdentity()).next().value("address");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             graph1.close();
+
             // graph.vertices(v.)
 
         });
