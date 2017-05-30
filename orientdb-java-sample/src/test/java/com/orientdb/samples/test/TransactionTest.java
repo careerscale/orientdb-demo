@@ -10,7 +10,8 @@ import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.orientechnologies.orient.core.sql.executor.OResultSet;
@@ -22,17 +23,21 @@ public class TransactionTest {
     public static final String NAME = "name";
     public static final String STREET = "street";
 
-    @BeforeClass
+    @BeforeTest
     public static OrientGraphFactory setup() {
-        factory = new OrientGraphFactory("memory:transdemo", "admin", "admin").setupPool(1, 10);
+        factory = new OrientGraphFactory("memory:trans", "admin", "admin").setupPool(1, 10);
         OrientGraph graph = factory.getNoTx();
         setupDbSchema(graph);
         return factory;
+    }
+
+    @AfterTest
+    public static void cleanUp() {
 
     }
 
-    @Test
-    public void testDbTransactionOperations() {
+    @Test(priority = 2)
+    public void testDbTransactionOperations_Not_Working() {
         // Block for creating employees
         OrientGraph noTxGraph = factory.getNoTx();
         OrientGraph graph = factory.getTx();
@@ -51,6 +56,47 @@ public class TransactionTest {
             countryVertex = iterator.hasNext() ? iterator.next() : null;
 
             empVertex1.addEdge(BELONGS_TO, countryVertex);
+
+            noTxGraph.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (null != noTxGraph && !noTxGraph.isClosed()) {
+                noTxGraph.close();
+            }
+        }
+
+        // Block for testing the created employees count
+        int count = 0;
+        try {
+            OResultSet vertices = graph.executeSql("select from Employee");
+            while (vertices.hasNext()) {
+                vertices.next();
+                count++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (null != graph && !graph.isClosed()) {
+                graph.close();
+            }
+        }
+
+        Assert.assertEquals(count, 0, "Transaction is not rolleed back, records created");
+
+    }
+
+    @Test(priority = 1)
+    public void testDbTransactionOperations_Working() {
+        // Block for creating employees
+        OrientGraph noTxGraph = factory.getNoTx();
+        OrientGraph graph = factory.getTx();
+        try {
+            noTxGraph = factory.getNoTx();
+            // Creating employees
+            noTxGraph.begin();
+            Vertex empVertex1 =
+                    noTxGraph.addVertex(T.label, EMPLOYEE, NAME, "first +  last" + new Random().nextDouble());
 
             noTxGraph.commit();
         } catch (Exception e) {
@@ -100,6 +146,10 @@ public class TransactionTest {
                 params);
         noTxGraph.executeSql("CREATE INDEX Country.id ON Country (id) UNIQUE");
         noTxGraph.executeSql("CREATE PROPERTY Country.name STRING (MANDATORY TRUE, MIN 4, MAX 50);", params);
+    }
+
+    private static void cleanUpDBSchema(OrientGraph noTxGraph) {
+        noTxGraph.executeSql("DELETE class V ;");
     }
 
 }
