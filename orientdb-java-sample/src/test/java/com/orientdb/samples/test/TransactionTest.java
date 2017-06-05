@@ -39,37 +39,35 @@ public class TransactionTest {
     @Test(priority = 2)
     public void testDbTransactionOperations_Not_Working() {
         // Block for creating employees
-        OrientGraph noTxGraph = factory.getNoTx();
-        OrientGraph graph = factory.getTx();
+        OrientGraph graph1 = factory.getTx();
+        OrientGraph graph2 = factory.getTx();
         try {
-            noTxGraph = factory.getNoTx();
             // Creating employees
-            noTxGraph.begin();
-            Vertex empVertex1 = noTxGraph.addVertex(T.label, EMPLOYEE, NAME,
-                    "first +  last" + new Random().nextDouble(), STREET, "Street" + new Random().nextDouble());
+            Vertex empVertex1 = graph1.addVertex(T.label, EMPLOYEE, NAME, "first +  last" + new Random().nextDouble(),
+                    STREET, "Street" + new Random().nextDouble());
 
             // Invalid country vertex
             Vertex countryVertex = null;
-            OResultSet vertices = graph.executeSql("select from Country where id  = ? ", 44);
+            OResultSet vertices = graph2.executeSql("select from Country where id  = ? ", 44);
 
-            Iterator<Vertex> iterator = graph.vertices(vertices.next().getVertex().get().getIdentity());
+            Iterator<Vertex> iterator = graph2.vertices(vertices.next().getVertex().get().getIdentity());
             countryVertex = iterator.hasNext() ? iterator.next() : null;
 
             empVertex1.addEdge(BELONGS_TO, countryVertex);
 
-            noTxGraph.commit();
+            graph1.commit();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (null != noTxGraph && !noTxGraph.isClosed()) {
-                noTxGraph.close();
+            if (null != graph1 && !graph1.isClosed()) {
+                graph1.close();
             }
         }
 
         // Block for testing the created employees count
         int count = 0;
         try {
-            OResultSet vertices = graph.executeSql("select from Employee");
+            OResultSet vertices = graph2.executeSql("select from Employee");
             while (vertices.hasNext()) {
                 vertices.next();
                 count++;
@@ -77,8 +75,8 @@ public class TransactionTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (null != graph && !graph.isClosed()) {
-                graph.close();
+            if (null != graph2 && !graph2.isClosed()) {
+                graph2.close();
             }
         }
 
