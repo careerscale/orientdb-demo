@@ -26,7 +26,7 @@ public class EmployeeCascadeTest {
     @BeforeTest
     public static OrientGraphFactory setup() {
         // Execute the testdb.sql file in the resource folder
-        factory = new OrientGraphFactory("remote:localhost/testdb", "root", "cloud").setupPool(1, 10);
+        factory = new OrientGraphFactory("remote:localhost/testdb", "admin", "admin").setupPool(1, 10);
         OrientGraph graph = factory.getNoTx();
         // setupDbSchema(graph);
         return factory;

@@ -1,4 +1,4 @@
 SET ignoreErrors true;
-DROP DATABASE remote:localhost/testdb root cloud
+DROP DATABASE remote:localhost/testdb admin admin
 SET ignoreErrors false;
-CREATE DATABASE remote:localhost/testdb root cloud plocal graph
+CREATE DATABASE remote:localhost/testdb admin admin plocal graph
