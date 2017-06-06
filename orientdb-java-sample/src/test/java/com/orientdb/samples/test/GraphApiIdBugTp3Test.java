@@ -7,12 +7,11 @@ import java.util.Random;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResultSet;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-
-import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 @Test
 public class GraphApiIdBugTp3Test {
@@ -73,10 +72,10 @@ public class GraphApiIdBugTp3Test {
     private void verifyUniqueIds() {
 
         OrientGraph graph = factory.getTx();
-        OResultSet vertices = graph.executeSql("select from User");
+        OGremlinResultSet vertices = graph.executeSql("select from User");
         List<Long> ids = Lists.newArrayList();
 
-        vertices.vertexStream().forEach(v -> {
+        vertices.stream().forEach(v -> {
             Long id = v.getProperty("id");
             Assert.assertFalse(ids.contains(id), "id is duplicate : " + id);
             ids.add(id);
@@ -99,15 +98,14 @@ public class GraphApiIdBugTp3Test {
         graph.close();
 
         graph = factory.getTx();
-        OResultSet vertices = graph.executeSql("select from User");
+        OGremlinResultSet vertices = graph.executeSql("select from User");
 
-
-        vertices.vertexStream().forEach(v -> {
+        vertices.stream().forEach(v -> {
             // this works
             String someProperty = v.getProperty("name");
 
             OrientGraph graph1 = factory.getTx();
-            graph1.vertices(v.getRecord().getIdentity()).next().value("test");
+            v.getVertex().get().value("test");
             graph1.close();
             // graph.vertices(v.)
 
@@ -115,7 +113,6 @@ public class GraphApiIdBugTp3Test {
 
         graph.close();
     }
-
 
     @Test
     public void testIdBug_concurrentModificationException() {

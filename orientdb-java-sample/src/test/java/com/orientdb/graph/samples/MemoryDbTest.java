@@ -6,12 +6,11 @@ import java.util.Random;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResultSet;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 public class MemoryDbTest {
 
@@ -47,19 +46,19 @@ public class MemoryDbTest {
         graph.close();
         graph = factory.getTx();
         graph.makeActive();
-        OResultSet vertices = graph.executeSql("select from User");
+        OGremlinResultSet vertices = graph.executeSql("select from User");
 
 
-        vertices.vertexStream().forEach(v -> {
+        vertices.stream().forEach(v -> {
             // this works
             String someProperty = v.getProperty("name");
 
             OrientGraph graph1 = factory.getTx();
-            String value = graph1.vertices(v.getRecord().getIdentity()).next().value("name");
+            String value = v.getVertex().get().value("name");
             System.out.println("value is " + value);
 
             try {
-                String addressValue = graph1.vertices(v.getRecord().getIdentity()).next().value("address");
+                String addressValue = v.getVertex().get().value("address");
             } catch (Exception e) {
                 e.printStackTrace();
             }

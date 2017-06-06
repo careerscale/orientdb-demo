@@ -7,14 +7,14 @@ import java.util.Random;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResult;
+import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResultSet;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 public class TransactionTest {
     private static final String BELONGS_TO = "BELONGS_TO";
@@ -48,10 +48,10 @@ public class TransactionTest {
 
             // Invalid country vertex
             Vertex countryVertex = null;
-            OResultSet vertices = graph2.executeSql("select from Country where id  = ? ", 44);
+            OGremlinResultSet vertices = graph2.executeSql("select from Country where id  = ? ", 44);
 
-            Iterator<Vertex> iterator = graph2.vertices(vertices.next().getVertex().get().getIdentity());
-            countryVertex = iterator.hasNext() ? iterator.next() : null;
+            Iterator<OGremlinResult> iterator = vertices.iterator();
+            countryVertex = iterator.hasNext() ? iterator.next().getVertex().get() : null;
 
             empVertex1.addEdge(BELONGS_TO, countryVertex);
 
@@ -67,9 +67,10 @@ public class TransactionTest {
         // Block for testing the created employees count
         int count = 0;
         try {
-            OResultSet vertices = graph2.executeSql("select from Employee");
-            while (vertices.hasNext()) {
-                vertices.next();
+            OGremlinResultSet vertices = graph2.executeSql("select from Employee");
+            Iterator<OGremlinResult> iterator = vertices.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
                 count++;
             }
         } catch (Exception e) {
@@ -108,9 +109,10 @@ public class TransactionTest {
         // Block for testing the created employees count
         int count = 0;
         try {
-            OResultSet vertices = graph.executeSql("select from Employee");
-            while (vertices.hasNext()) {
-                vertices.next();
+            OGremlinResultSet vertices = graph.executeSql("select from Employee");
+            Iterator<OGremlinResult> iterator = vertices.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
                 count++;
             }
         } catch (Exception e) {

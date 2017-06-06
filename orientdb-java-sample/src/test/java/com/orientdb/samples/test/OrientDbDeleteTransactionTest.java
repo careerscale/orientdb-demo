@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResultSet;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -11,7 +12,6 @@ import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
 import com.orientechnologies.orient.core.record.OVertex;
-import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 /**
  * Execute supporting db script. orientdb-java-sample\src\test\resources\testSchema.sql
@@ -155,7 +155,7 @@ public class OrientDbDeleteTransactionTest {
             // Without Transaction Delete API is working fine
             graph.begin();
 
-            OResultSet resultSet = graph.executeSql("delete Vertex from User where name= ?", "Jeff");
+            OGremlinResultSet resultSet = graph.executeSql("delete Vertex from User where name= ?", "Jeff");
             resultSet.close();
             graph.commit();
         } catch (Exception e) {
@@ -171,10 +171,10 @@ public class OrientDbDeleteTransactionTest {
 
     private void verifyCount(int count) {
         OrientGraph graph = factory.getTx();
-        OResultSet vertices = graph.executeSql("select from User");
+        OGremlinResultSet vertices = graph.executeSql("select from User");
         List<Long> ids = Lists.newArrayList();
 
-        vertices.vertexStream().forEach(v -> {
+        vertices.stream().forEach(v -> {
             Long id = v.getProperty("id");
             ids.add(id);
         });

@@ -7,14 +7,13 @@ import java.util.Random;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResultSet;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
-
-import com.orientechnologies.orient.core.sql.executor.OResultSet;
 
 @Test
 public class TransactionalTestsOrientGraph3InMemory {
@@ -73,10 +72,10 @@ public class TransactionalTestsOrientGraph3InMemory {
     private void verifyUniqueIds() {
 
         OrientGraph graph = factory.getTx();
-        OResultSet vertices = graph.executeSql("select from User");
+        OGremlinResultSet vertices = graph.executeSql("select from User");
         List<Long> ids = Lists.newArrayList();
 
-        vertices.vertexStream().forEach(v -> {
+        vertices.stream().forEach(v -> {
             Long id = v.getProperty("id");
             Assert.assertFalse(ids.contains(id), "id is duplicate : " + id);
             ids.add(id);
@@ -101,19 +100,19 @@ public class TransactionalTestsOrientGraph3InMemory {
         graph.close();
 
         graph = factory.getTx();
-        OResultSet vertices = graph.executeSql("select from User");
+        OGremlinResultSet vertices = graph.executeSql("select from User");
 
 
-        vertices.vertexStream().forEach(v -> {
+        vertices.stream().forEach(v -> {
             // this works
             String someProperty = v.getProperty("name");
 
             OrientGraph graph1 = factory.getTx();
-            String value = graph1.vertices(v.getRecord().getIdentity()).next().value("name");
+            String value = v.getVertex().get().value("name");
             System.out.println("value is " + value);
 
             try {
-                String addressValue = graph1.vertices(v.getRecord().getIdentity()).next().value("address");
+                String addressValue = v.getVertex().get().value("address");
             } catch (Exception e) {
                 e.printStackTrace();
             }
