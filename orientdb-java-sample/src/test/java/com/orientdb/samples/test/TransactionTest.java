@@ -36,8 +36,57 @@ public class TransactionTest {
 
     }
 
+
     @Test(priority = 2)
     public void testDbTransactionOperations_Not_Working() {
+        // Block for creating employees
+        OrientGraph graph1 = factory.getTx();
+        OrientGraph graph2 = factory.getTx();
+        try {
+            // Creating employees
+            Vertex empVertex1 = graph1.addVertex(T.label, EMPLOYEE, NAME, "first +  last" + new Random().nextDouble(),
+                    STREET, "Street" + new Random().nextDouble());
+            Vertex empVertex2 = graph1.addVertex(T.label, EMPLOYEE, NAME, "first +  last" + new Random().nextDouble(),
+                    STREET, "Street" + new Random().nextDouble());
+            Vertex empVertex3 = graph1.addVertex(T.label, EMPLOYEE, NAME, "first +  last" + new Random().nextDouble(),
+                    STREET, "Street" + new Random().nextDouble());
+            Vertex empVertex4 = graph1.addVertex(T.label, EMPLOYEE, NAME, "first +  last" + new Random().nextDouble(),
+                    STREET, "Street" + new Random().nextDouble());
+
+
+
+            graph1.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (null != graph1 && !graph1.isClosed()) {
+                graph1.close();
+            }
+        }
+
+        // Block for testing the created employees count
+        int count = 0;
+        try {
+            OGremlinResultSet vertices = graph2.executeSql("select from Employee");
+            Iterator<OGremlinResult> iterator = vertices.iterator();
+            while (iterator.hasNext()) {
+                iterator.next();
+                count++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (null != graph2 && !graph2.isClosed()) {
+                graph2.close();
+            }
+        }
+
+        Assert.assertEquals(count, 4, "Transaction is not rolleed back, records created");
+
+    }
+
+    @Test(priority = 2)
+    public void testDbTransactionOperations_new_bug() {
         // Block for creating employees
         OrientGraph graph1 = factory.getTx();
         OrientGraph graph2 = factory.getTx();
@@ -146,6 +195,8 @@ public class TransactionTest {
                 params);
         noTxGraph.executeSql("CREATE INDEX Country.id ON Country (id) UNIQUE");
         noTxGraph.executeSql("CREATE PROPERTY Country.name STRING (MANDATORY TRUE, MIN 4, MAX 50);", params);
+
+        noTxGraph.executeSql("CREATE VERTEX ", params);
     }
 
     private static void cleanUpDBSchema(OrientGraph noTxGraph) {
