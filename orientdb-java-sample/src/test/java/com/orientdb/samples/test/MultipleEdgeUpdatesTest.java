@@ -42,10 +42,18 @@ public class MultipleEdgeUpdatesTest {
         OrientGraph noTxGraph = factory.getNoTx();
 
         Map<String, Object> params = new HashMap<>();
-        graph.executeSql("Update PART_OF set status=1 where out.id=1", params);
-        graph.executeSql("Update PART_OF set status=1 where out.id=2", params);
-        graph.executeSql("Update PART_OF set status=1 where out.id=3", params);
-        graph.executeSql("Update PART_OF set status=1 where out.id=4", params);
+
+
+        OGremlinResultSet result = graph.executeSql("select from PART_OF", params);
+        int wCount = 0;
+        while (result.iterator().hasNext()) {
+            Edge edge = result.iterator().next().getEdge().get();
+
+            graph.executeSql("Update PART_OF set status=1 where out.id=" + edge.value("id"), params);
+
+            wCount++;
+
+        }
 
 
         graph.commit();
@@ -53,17 +61,19 @@ public class MultipleEdgeUpdatesTest {
         graph.close();
 
         graph = factory.getTx();
-        OGremlinResultSet result = graph.executeSql("select from PART_OF", params);
-        int count = 0;
+        result = graph.executeSql("select from PART_OF", params);
+        int rCount = 0;
         while (result.iterator().hasNext()) {
             Edge edge = result.iterator().next().getEdge().get();
+
+            System.out.println(edge + " id is " + edge.property("id").toString() + " status is "
+                    + edge.property("status").toString());
             assertEquals(edge.value("status").toString(), "1");
-            System.out.println(edge);
-            count++;
+            rCount++;
 
         }
 
-        assertEquals(count, 5, "PART_OF edges should be 5 in total");
+        assertEquals(rCount, wCount, "PART_OF edges should be same");
         graph.close();
 
 
