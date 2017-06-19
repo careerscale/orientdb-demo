@@ -49,7 +49,7 @@ public class MultipleEdgeUpdatesTest {
         while (result.iterator().hasNext()) {
             Edge edge = result.iterator().next().getEdge().get();
 
-            graph.executeSql("Update PART_OF set status=1 where out.id=" + edge.value("id"), params);
+            graph.executeSql("Update PART_OF set status=1 where out.id=" + edge.outVertex().value("id"), params);
 
             wCount++;
 
