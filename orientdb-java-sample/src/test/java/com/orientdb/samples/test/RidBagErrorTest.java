@@ -23,7 +23,8 @@ public class RidBagErrorTest {
     @BeforeTest
     public static OrientGraphFactory setup() {
         // factory = new OrientGraphFactory("memory:trans", "admin", "admin").setupPool(1, 10);
-        factory = new OrientGraphFactory("remote:localhost/test1", "root", "cloud").setupPool(1, 10);
+        // make sure demo db exists and credentials are correct
+        factory = new OrientGraphFactory("remote:localhost/demo", "root", "cloud").setupPool(1, 10);
         OrientGraph graph = factory.getNoTx();
         // setupDbSchema(graph);
         return factory;
@@ -83,6 +84,7 @@ public class RidBagErrorTest {
         } catch (Exception e) {
             graph2.rollback();
             e.printStackTrace();
+            throw e;
         } finally {
             if (null != graph2 && !graph2.isClosed()) {
                 graph2.close();
