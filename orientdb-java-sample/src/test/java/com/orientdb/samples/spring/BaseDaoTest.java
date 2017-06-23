@@ -26,7 +26,7 @@ public class BaseDaoTest extends AbstractTestNGSpringContextTests {
 
 
     @Autowired
-    BaseDao dao;
+    BaseDaoImpl dao;
     OrientGraph graph = null;
 
     // @BeforeSuite
