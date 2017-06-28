@@ -1,11 +1,13 @@
 package com.orientdb.samples.test;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.OrientGraphFactory;
+import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResult;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.testng.annotations.AfterTest;
@@ -72,11 +74,23 @@ public class RidBagErrorTest {
 
 
             for (int i = 1; i < 5; i++) {
-                Vertex e1 =
-                        graph2.executeSql("select from Employee where id  = ? ", i).iterator().next().getVertex().get();
-                Vertex e2 = graph2.executeSql("select from Employee where id  = ? ", i + 1).iterator().next()
-                        .getVertex().get();
-                e1.addEdge(MANAGES, e2);
+
+                Iterator<OGremlinResult> result1 =
+                        graph2.executeSql("select from Employee where id  = ? ", i).iterator();
+                Vertex e1 = null;
+                Vertex e2 = null;
+                if (result1.hasNext()) {
+                    e1 = result1.next().getVertex().get();
+                }
+
+                Iterator<OGremlinResult> result2 =
+                        graph2.executeSql("select from Employee where id  = ? ", i).iterator();
+                if (result2.hasNext()) {
+                    e2 = result2.next().getVertex().get();
+                }
+
+                if (e1 != null)
+                    e1.addEdge(MANAGES, e2);
             }
 
             graph2.commit();
