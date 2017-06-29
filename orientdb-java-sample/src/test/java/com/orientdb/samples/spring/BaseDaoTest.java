@@ -38,53 +38,34 @@ public class BaseDaoTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
-
     public void testMultiEdgeUpdate_single_transsaction() {
-
         OrientGraph graph = baseDao.getOrientGraph();
-
         OrientGraph noTxGraph = baseDao.getNoTxGraph();
-
         Map<String, Object> params = new HashMap<>();
-
 
         OGremlinResultSet result = graph.executeSql("select from PART_OF", params);
         int wCount = 0;
         while (result.iterator().hasNext()) {
             Edge edge = result.iterator().next().getEdge().get();
-
             graph.executeSql("Update PART_OF set status=1 where out.id=" + edge.outVertex().value("id"), params);
-
             wCount++;
-
         }
-
-
         graph.commit();
-
         graph.close();
-
         result = graph.executeSql("select from PART_OF", params);
         int rCount = 0;
         while (result.iterator().hasNext()) {
             Edge edge = result.iterator().next().getEdge().get();
-
             System.out.println(edge + " id is " + edge.property("id").toString() + " status is "
                     + edge.property("status").toString());
             assertEquals(edge.value("status").toString(), "1");
             rCount++;
-
         }
-
         assertEquals(rCount, wCount, "PART_OF edges should be same");
         graph.close();
-
-
-
     }
 
     private static void setupDbSchema(OrientGraph noTxGraph) {
-
         noTxGraph.executeSql("ALTER DATABASE DATETIMEFORMAT \"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\"");
         noTxGraph.executeSql("CREATE CLASS BV EXTENDS V");
         noTxGraph.executeSql(
