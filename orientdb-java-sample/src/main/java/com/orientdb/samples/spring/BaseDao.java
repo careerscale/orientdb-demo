@@ -7,9 +7,9 @@ import org.apache.tinkerpop.gremlin.orientdb.OrientGraph;
 import org.apache.tinkerpop.gremlin.orientdb.executor.OGremlinResultSet;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.springframework.stereotype.Repository;
 
-
-
+@Repository("baseDao")
 public interface BaseDao {
 
     /**

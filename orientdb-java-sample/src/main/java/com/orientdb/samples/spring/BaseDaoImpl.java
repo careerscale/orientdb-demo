@@ -16,9 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-
-@Repository
-public abstract class BaseDaoImpl implements BaseDao {
+@Repository("baseDao")
+public class BaseDaoImpl implements BaseDao {
 
 
     @Autowired

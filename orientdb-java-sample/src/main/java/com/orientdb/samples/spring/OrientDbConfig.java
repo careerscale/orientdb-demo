@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Scope;
  */
 
 @org.springframework.context.annotation.Configuration
-@ComponentScan("com.orientdb.samples.spring.*")
+@ComponentScan("com.orientdb.samples.*")
 public class OrientDbConfig {
 
     /** Reference to logger */

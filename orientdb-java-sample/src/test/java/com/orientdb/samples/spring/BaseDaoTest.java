@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
@@ -20,13 +21,14 @@ import org.testng.annotations.Test;
 @Test
 @DirtiesContext
 @SpringBootTest(classes = Application.class)
+@ComponentScan("com.orientdb.*")
 public class BaseDaoTest extends AbstractTestNGSpringContextTests {
 
     private static final Logger LOG = LoggerFactory.getLogger(BaseDaoTest.class);
 
 
     @Autowired
-    BaseDaoImpl dao;
+    BaseDao baseDao;
     OrientGraph graph = null;
 
     // @BeforeSuite
@@ -39,9 +41,9 @@ public class BaseDaoTest extends AbstractTestNGSpringContextTests {
 
     public void testMultiEdgeUpdate_single_transsaction() {
 
-        OrientGraph graph = dao.getOrientGraph();
+        OrientGraph graph = baseDao.getOrientGraph();
 
-        OrientGraph noTxGraph = dao.getNoTxGraph();
+        OrientGraph noTxGraph = baseDao.getNoTxGraph();
 
         Map<String, Object> params = new HashMap<>();
 
