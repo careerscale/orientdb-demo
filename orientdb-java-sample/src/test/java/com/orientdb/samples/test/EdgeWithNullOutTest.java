@@ -55,6 +55,7 @@ public class EdgeWithNullOutTest {
         orientDb.createIfNotExists("test", ODatabaseType.PLOCAL);
 
         ODatabaseDocument session = orientDb.open("test", "admin", "admin");
+
         // ...
         session.close();
         orientDb.drop("test");
